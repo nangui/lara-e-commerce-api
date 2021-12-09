@@ -27,7 +27,7 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $user = User::query()->create($request->only('first_name', 'last_name', 'email') + [
-            'password' => Hash::make($request->get('password'))
+            'password' => Hash::make('pass@123')
         ]);
 
         return response(UserResource::make($user), Response::HTTP_CREATED);
