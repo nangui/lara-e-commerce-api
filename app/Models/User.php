@@ -38,6 +38,11 @@ use Laravel\Passport\HasApiTokens;
  * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Passport\Token[] $tokens
  * @property-read int|null $tokens_count
+ * @property int $role_id
+ * @property-read \App\Models\Role $role
+ * @method static UserCollection|static[] all($columns = ['*'])
+ * @method static UserCollection|static[] get($columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereRoleId($value)
  */
 class User extends Authenticatable
 {

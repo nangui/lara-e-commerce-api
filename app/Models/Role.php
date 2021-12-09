@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder|Role whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Role whereName($value)
  * @mixin \Eloquent
+ * @property-read \App\Support\UserCollection|\App\Models\User[] $users
+ * @property-read int|null $users_count
  */
 class Role extends Model
 {
