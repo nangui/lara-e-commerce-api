@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Support\UserCollection;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -34,6 +36,8 @@ use Laravel\Passport\HasApiTokens;
  * @method static \Illuminate\Database\Eloquent\Builder|User wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Passport\Token[] $tokens
+ * @property-read int|null $tokens_count
  */
 class User extends Authenticatable
 {
@@ -48,6 +52,7 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'email',
+        'role_id',
         'password',
     ];
 
@@ -59,4 +64,14 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    public function newCollection(array $models = []): UserCollection
+    {
+        return new UserCollection($models);
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
 }

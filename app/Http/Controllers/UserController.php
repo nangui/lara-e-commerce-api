@@ -17,19 +17,19 @@ class UserController extends Controller
 {
     public function index(): UserCollection
     {
-        return new UserCollection(User::query()->orderByDesc('id')->paginate(10));
+        return new UserCollection(User::query()->with('role')->orderByDesc('id')->paginate(10));
     }
 
     public function show($id): UserResource
     {
-        $user = User::query()->findOrFail($id);
+        $user = User::query()->with('role')->findOrFail($id);
 
         return new UserResource($user);
     }
 
     public function store(StoreUserRequest $request)
     {
-        $user = User::query()->create($request->only('first_name', 'last_name', 'email') + [
+        $user = User::query()->create($request->only('first_name', 'last_name', 'email', 'role_id') + [
             'password' => Hash::make('pass@123')
         ]);
 
@@ -40,7 +40,7 @@ class UserController extends Controller
     {
         $user = User::query()->findOrFail($id);
 
-        $user->update($request->only('first_name', 'last_name', 'email'));
+        $user->update($request->only('first_name', 'last_name', 'email', 'role_id'));
 
         return response(UserResource::make($user), Response::HTTP_ACCEPTED);
     }

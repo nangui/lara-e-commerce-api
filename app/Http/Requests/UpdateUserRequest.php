@@ -26,7 +26,8 @@ class UpdateUserRequest extends FormRequest
         return [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|required|string|max:100',
-            'email' => 'sometimes|required|email'
+            'email' => 'sometimes|required|email',
+            'role_id' => 'required|exists:App\Models\Role,id'
         ];
     }
 }
