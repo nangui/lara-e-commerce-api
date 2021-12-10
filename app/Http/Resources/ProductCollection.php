@@ -6,6 +6,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ProductCollection extends ResourceCollection
 {
+    public $collects = ProductResource::class;
     /**
      * Transform the resource collection into an array.
      *
@@ -14,6 +15,8 @@ class ProductCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'data' => $this->collection
+        ];
     }
 }

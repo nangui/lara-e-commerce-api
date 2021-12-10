@@ -28,6 +28,7 @@ class UserResource extends JsonResource
             'relationships' => [
                 'role' => [
                     'data' => [
+                        'id' => $this->role->id,
                         'name' => $this->role->name
                     ]
                 ]

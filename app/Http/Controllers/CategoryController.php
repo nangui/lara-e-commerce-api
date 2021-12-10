@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use Illuminate\Database\Eloquent\Builder;
+use App\Repositories\Contracts\ICategoryRepository;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,21 +13,28 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CategoryController extends Controller
 {
+    private ICategoryRepository $categoryRepository;
+
+    public function __construct(ICategoryRepository $categoryRepository)
+    {
+        $this->categoryRepository = $categoryRepository;
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @return Builder[]|Collection
+     * @return Collection
      */
-    public function index()
+    public function index(): Collection
     {
-        return Category::query()->get();
+        return $this->categoryRepository->all();
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return Application|ResponseFactory|\Illuminate\Http\Response
      * @throws ValidationException
      */
     public function store(Request $request)
@@ -35,7 +43,7 @@ class CategoryController extends Controller
             'name' => 'required'
         ]);
 
-        $category = Category::create([
+        $category = $this->categoryRepository->create([
             'name' => $request->get('name'),
             'slug' => Str::slug((string)$request->get('name'))
         ]);
@@ -46,11 +54,13 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Category $category
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @param int $id
+     * @return Application|ResponseFactory|\Illuminate\Http\Response
      */
-    public function show(Category $category)
+    public function show(int $id)
     {
+        $category = $this->categoryRepository->findById($id);
+
         return response($category);
     }
 
@@ -58,30 +68,30 @@ class CategoryController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param Category $category
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @param int $id
+     * @return Application|ResponseFactory|\Illuminate\Http\Response
      * @throws ValidationException
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, int $id)
     {
         $this->validate($request, ['name' => 'required']);
 
-        $category->update($request->only('name') + [
+        $result = $this->categoryRepository->update($id, $request->only('name') + [
             'slug' => Str::slug($request->get('name'))
         ]);
 
-        return response($category, Response::HTTP_ACCEPTED);
+        return response($result, Response::HTTP_ACCEPTED);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param Category $category
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @param int $id
+     * @return Application|ResponseFactory|\Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy(int $id)
     {
-        $category->delete();
+        $this->categoryRepository->deleteById($id);
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
