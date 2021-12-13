@@ -28,7 +28,6 @@ class UpdateProductRequest extends FormRequest
             'title' => 'required|string|max:100',
             'subtitle' => 'nullable|string',
             'description' => 'nullable|string',
-            'specifications' => 'required',
         ];
     }
 }

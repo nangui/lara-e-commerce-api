@@ -11,9 +11,9 @@ class CreateVariationRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,10 +21,17 @@ class CreateVariationRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            //
+            'product_id' => 'required|exists:products,id',
+            'us_size' => 'required|numeric',
+            'euro_size' => 'required|numeric',
+            'uk_size' => 'required|numeric',
+            'color_name' => 'required|string',
+            'color_code' => 'required|string|min:7|max:7',
+            'price' => 'required|numeric',
+            'images' => 'required'
         ];
     }
 }
