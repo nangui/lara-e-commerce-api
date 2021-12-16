@@ -8,6 +8,7 @@ use App\Http\Resources\VariationCollection;
 use App\Http\Resources\VariationResource;
 use App\Models\Variation;
 use App\Repositories\Contracts\IVariationRepository;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -29,9 +30,11 @@ class VariationController extends Controller
      * Display a listing of the resource.
      *
      * @return VariationCollection
+     * @throws AuthorizationException
      */
     public function index(): VariationCollection
     {
+        \Gate::authorize('view', 'products');
         $variations = $this->variationRepository->paginate(self::DEFAULT_COLUMN, self::DEFAULT_RELATIONS);
 
         return VariationCollection::make($variations);
@@ -42,9 +45,11 @@ class VariationController extends Controller
      *
      * @param CreateVariationRequest $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function store(CreateVariationRequest $request)
     {
+        \Gate::authorize('edit', 'products');
         $payload = $request->all();
 
         $variation = $this->variationRepository->create($payload);
@@ -67,9 +72,11 @@ class VariationController extends Controller
      *
      * @param int $id
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function show(int $id): \Illuminate\Http\Response
     {
+        \Gate::authorize('view', 'products');
         $variation = $this->variationRepository->findById($id, self::DEFAULT_COLUMN, self::DEFAULT_RELATIONS);
 
         return response(VariationResource::make($variation));
@@ -81,9 +88,11 @@ class VariationController extends Controller
      * @param UpdateVariationRequest $request
      * @param int $id
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
-    public function update(UpdateVariationRequest $request, int $id)
+    public function update(UpdateVariationRequest $request, int $id): \Illuminate\Http\Response
     {
+        \Gate::authorize('edit', 'products');
         $created = $this->variationRepository->update($id, $request->only(
             'product_id',
             'us_size',
@@ -113,11 +122,13 @@ class VariationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int $id
+     * @param int $id
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function destroy(int $id): \Illuminate\Http\Response
     {
+        \Gate::authorize('edit', 'products');
         $this->variationRepository->deleteById($id);
         return response(null, Response::HTTP_NO_CONTENT);
     }

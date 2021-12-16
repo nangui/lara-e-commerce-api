@@ -7,9 +7,9 @@ use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
-use App\Models\User;
 use App\Repositories\Contracts\IUserRepository;
 use Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
@@ -38,18 +38,23 @@ class UserController extends Controller
 
     /**
      * @return UserCollection
+     * @throws AuthorizationException
      */
     public function index(): UserCollection
     {
+        \Gate::authorize('view', 'users');
+
         return new UserCollection($this->userRepository->paginate(self::DEFAULT_COLUMN, self::DEFAULT_RELATIONS));
     }
 
     /**
      * @param int $id
      * @return UserResource
+     * @throws AuthorizationException
      */
     public function show(int $id): UserResource
     {
+        \Gate::authorize('view', 'users');
         $user = $this->userRepository->findById($id, self::DEFAULT_COLUMN, self::DEFAULT_RELATIONS);
 
         return new UserResource($user);
@@ -58,9 +63,11 @@ class UserController extends Controller
     /**
      * @param StoreUserRequest $request
      * @return Application|ResponseFactory|\Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function store(StoreUserRequest $request)
     {
+        \Gate::authorize('edit', 'users');
         $user = $this->userRepository->create($request->only(
             self::KEY_FIRSTNAME,
             self::KEY_LASTNAME,
@@ -77,9 +84,11 @@ class UserController extends Controller
      * @param UpdateUserRequest $request
      * @param $id
      * @return Application|ResponseFactory|\Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function update(UpdateUserRequest $request, $id)
     {
+        \Gate::authorize('view', 'users');
         $result = $this->userRepository->update($id, $request->only(
             self::KEY_FIRSTNAME,
             self::KEY_LASTNAME,
@@ -93,20 +102,26 @@ class UserController extends Controller
     /**
      * @param $id
      * @return Application|ResponseFactory|\Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function destroy($id)
     {
+        \Gate::authorize('view', 'users');
         $this->userRepository->deleteById($id);
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
 
     /**
-     * @return User|null
+     * @return UserResource
      */
-    public function user(): ?User
+    public function user(): UserResource
     {
-        return Auth::user();
+        return UserResource::make(Auth::user())->additional([
+            'relationships' => [
+                'permissions' => Auth::user()->permissions()
+            ]
+        ]);
     }
 
     /**

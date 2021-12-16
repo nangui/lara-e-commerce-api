@@ -7,6 +7,9 @@ use App\Repositories\Contracts\ICategoryRepository;
 
 class CategoryRepository extends BaseRepository implements ICategoryRepository
 {
+    /**
+     * @param Category $model
+     */
     public function __construct(Category $model)
     {
         parent::__construct($model);

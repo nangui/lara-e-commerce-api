@@ -7,21 +7,35 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Repositories\Contracts\IProductRepository;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
+    const DEFAULT_COLUMN = ['*'];
+    const DEFAULT_RELATIONS = ['variations'];
+
+    private IProductRepository $productRepository;
+
+    public function __construct(IProductRepository $productRepository)
+    {
+        $this->productRepository = $productRepository;
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return ProductCollection
+     * @throws AuthorizationException
      */
     public function index(): ProductCollection
     {
-        $products = Product::query()->with('variations')->orderByDesc('id')->orderBy('title')->paginate();
+        \Gate::authorize('view', 'products');
+        $products = $this->productRepository->paginate(self::DEFAULT_COLUMN, self::DEFAULT_RELATIONS);
 
-        return new ProductCollection($products);
+        return ProductCollection::make($products);
     }
 
     /**
@@ -29,9 +43,11 @@ class ProductController extends Controller
      *
      * @param CreateProductRequest $request
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function store(CreateProductRequest $request): \Illuminate\Http\Response
     {
+        \Gate::authorize('edit', 'products');
         $validated = $request->validated();
 
         $product = Product::create($validated + [
@@ -46,9 +62,11 @@ class ProductController extends Controller
      *
      * @param Product $product
      * @return ProductResource
+     * @throws AuthorizationException
      */
     public function show(Product $product): ProductResource
     {
+        \Gate::authorize('view', 'products');
         $product->load(['category', 'variations']);
 
         return new ProductResource($product);
@@ -57,30 +75,36 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  UpdateProductRequest  $request
-     * @param Product $product
+     * @param UpdateProductRequest $request
+     * @param int $id
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
-    public function update(UpdateProductRequest $request, Product $product): \Illuminate\Http\Response
+    public function update(UpdateProductRequest $request, $id): \Illuminate\Http\Response
     {
+        \Gate::authorize('edit', 'products');
         $validated = $request->validated();
 
-        $product->update($validated + [
-            'slug' => $validated['title']
+        $created = $this->productRepository->update($id, $validated + [
+           'slug' => $validated['title']
         ]);
 
-        return response(ProductResource::make($product), Response::HTTP_ACCEPTED);
+        if (!$created) return response(null, Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        return response(true, Response::HTTP_ACCEPTED);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param Product $product
+     * @param int $id
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
-    public function destroy(Product $product): \Illuminate\Http\Response
+    public function destroy(int $id): \Illuminate\Http\Response
     {
-        $product->delete();
+        \Gate::authorize('edit', 'products');
+        $this->productRepository->deleteById($id);
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

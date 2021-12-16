@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * App\Models\Variation
@@ -22,10 +25,10 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property string $color_name
  * @property string $color_code
  * @property string $price
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Product $product
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read Product $product
  * @method static \Illuminate\Database\Eloquent\Builder|Variation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Variation newQuery()
  * @method static \Illuminate\Database\Query\Builder|Variation onlyTrashed()
@@ -46,6 +49,8 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static \Illuminate\Database\Query\Builder|Variation withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Variation withoutTrashed()
  * @mixin \Eloquent
+ * @property-read MediaCollection|Media[] $media
+ * @property-read int|null $media_count
  */
 class Variation extends Model implements HasMedia
 {
